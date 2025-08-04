@@ -39,7 +39,7 @@ class CardSprite extends Physics.Arcade.Sprite
         this.setDepth(1000);
     }
 
-    isNotAtOrigin(pos)
+    isNotAtOrigin()
     {
         return !(matchingPosition(this, this.cardOrigin));
     }
@@ -48,6 +48,7 @@ class CardSprite extends Physics.Arcade.Sprite
     {
         this.movingToOrigin = false;
         this.hitbox.body.enable = true;
+        this.emitter.emit("sortFront", this.scene);
     }
 
     resetToOrigin()
@@ -67,8 +68,9 @@ class CardSprite extends Physics.Arcade.Sprite
         }
     }
 
-    init (hitboxSize, scale, depth)
+    init (hitboxSize, scale, depth, emitter)
     {
+        this.emitter = emitter;
         this.cardOrigin = {x:this.x, y:this.y};
         this.setInteractive({ draggable: true });
         this.setScale(scale);

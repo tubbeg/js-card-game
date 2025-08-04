@@ -1,5 +1,5 @@
 "use strict";
-import {Scene, Physics} from "phaser";
+import {Scene, Physics, Events} from "phaser";
 import { CardSprite } from "./CardSprite";
 
 
@@ -22,15 +22,22 @@ function sortByLeftToRight(cards)
 
 function bringCardToFront(cards)
 {
-    const sortedCards = sortByLeftToRight(cards);
-    for (let i = 0; i < sortedCards.length; i++)
+    if (cards == null)
     {
-        const c = sortedCards[i];
-        c.depth = i;
+        console.error("missing cards!");
+        return null;
     }
-    return sortedCards;
+    else
+    {
+        const sortedCards = sortByLeftToRight(cards);
+        for (let i = 0; i < sortedCards.length; i++)
+        {
+            const c = sortedCards[i];
+            c.depth = i;
+        }
+        return sortedCards;
+    }
 }
-
 
 class CardScene extends Scene
 {
@@ -38,10 +45,19 @@ class CardScene extends Scene
     {
         super({key: "card",active:true});
         this.cards = [];
+        this.emitter = new Events.EventEmitter();
     }
     preload ()
     {
         this.load.image("sprite","card-dummy.png");
+    }
+
+    sortFront()
+    {
+        if (this.cards != null)
+        {
+            this.cards = bringCardToFront(this.cards);
+        }
     }
 
     addCard(x,y)
@@ -49,7 +65,7 @@ class CardScene extends Scene
         const depth = this.cards.length;
         const hitboxSize = 30;
         const scale = 1;
-        const card = new CardSprite({scene:this, x:x,y:y}).init(hitboxSize, scale, depth);
+        const card = new CardSprite({scene:this, x:x,y:y}).init(hitboxSize, scale, depth, this.emitter);
         this.cards.forEach(c => 
         {
             addCardCollision(this,card.hitbox, c.hitbox);
@@ -63,6 +79,9 @@ class CardScene extends Scene
         this.addCard(400,400);
         this.addCard(450,400);
         this.addCard(500,400);
+        //using 'this' keyword can cause a lot of problems when
+        //using callback functions :)
+        this.emitter.on("sortFront", () => { this.sortFront()}); 
     }
 
     update (dt,time)
