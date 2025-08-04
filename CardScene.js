@@ -39,6 +39,18 @@ function bringCardToFront(cards)
     }
 }
 
+function addAcardsOverBdistance(scene,a,b, startAtX,startAtY)
+{
+    const distPerCard = Math.round(b / a);
+    let pos = {x:startAtX,y:startAtY};
+    for (let i = 0; i < a; i++)
+    {
+        scene.addCard(pos.x, pos.y);
+        pos.x = pos.x + distPerCard;
+    }
+
+}
+
 class CardScene extends Scene
 {
     constructor()
@@ -62,7 +74,7 @@ class CardScene extends Scene
 
     addCard(x,y)
     {
-        const depth = this.cards.length;
+        const depth = 100 - this.cards.length;
         const hitboxSize = 30;
         const scale = 1;
         const card = new CardSprite({scene:this, x:x,y:y}).init(hitboxSize, scale, depth, this.emitter);
@@ -76,12 +88,10 @@ class CardScene extends Scene
 
     create ()
     {
-        this.addCard(400,400);
-        this.addCard(450,400);
-        this.addCard(500,400);
+        addAcardsOverBdistance(this,7,500, 150,300);
         //using 'this' keyword can cause a lot of problems when
         //using callback functions :)
-        this.emitter.on("sortFront", () => { this.sortFront()}); 
+        this.emitter.on("sortFront", () => { this.sortFront()});
     }
 
     update (dt,time)

@@ -21,6 +21,15 @@ class CardHitbox extends GameObjects.Rectangle
     }
 }
 
+function addInputEvents(scene)
+{
+    scene.on('pointerup', (pointer, dragX, dragY) => {scene.selectCard(pointer)});
+    scene.on('drag', (pointer, dragX, dragY) => scene.dragCard(dragX, dragY));
+    scene.on('dragend', (pointer, dragX, dragY) => {scene.isNotDragging = true;});
+}
+
+
+
 class CardSprite extends Physics.Arcade.Sprite
 {
     constructor(conf)
@@ -28,6 +37,7 @@ class CardSprite extends Physics.Arcade.Sprite
         super(conf.scene, conf.x, conf.y, "sprite");
         this.isNotDragging = true;
         this.movingToOrigin = false;
+        this.selected = false;
         //this.body.gravity = 0;
     }
 
@@ -68,14 +78,29 @@ class CardSprite extends Physics.Arcade.Sprite
         }
     }
 
+    selectCard(pointer)
+    {
+        if (pointer.getDuration() < 150)
+        {
+            this.selected = !this.selected;
+            if (this.selected)
+            {
+                this.setTint(0xff0000);
+            }
+            else
+            {
+                this.clearTint();
+            }
+        }
+    }
+
     init (hitboxSize, scale, depth, emitter)
     {
         this.emitter = emitter;
         this.cardOrigin = {x:this.x, y:this.y};
         this.setInteractive({ draggable: true });
         this.setScale(scale);
-        this.on('drag', (pointer, dragX, dragY) => this.dragCard(dragX, dragY));
-        this.on('dragend', (pointer, dragX, dragY) => {this.isNotDragging = true;});
+        addInputEvents(this);
         //this.scene.setInteractive();
         this.hitbox = new CardHitbox(this, hitboxSize);
         this.scene.add.existing(this);
@@ -95,7 +120,6 @@ class CardSprite extends Physics.Arcade.Sprite
         }
         if (this.hitbox.nextPosition != null)
         {
-            console.log("swapping origin!!");
             this.cardOrigin = {x:this.hitbox.nextPosition.x, y:this.hitbox.nextPosition.y};
             this.hitbox.nextPosition = null;
             this.hitbox.origin = this.cardOrigin;
