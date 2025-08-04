@@ -13,9 +13,9 @@ function matchingPosition(p1,p2)
 
 class CardHitbox extends GameObjects.Rectangle
 {
-    constructor(card)
+    constructor(card, size)
     {
-        super(card.scene,card.x,card.y,100,100,0xff0000);
+        super(card.scene,card.x,card.y,size,size,0xff0000);
         this.nextPosition = null;
         this.origin = card.cardOrigin;
     }
@@ -36,6 +36,7 @@ class CardSprite extends Physics.Arcade.Sprite
         this.isNotDragging = false;
         this.setPosition(dX,dY);
         this.hitbox.setPosition(dX,dY);
+        this.setDepth(1000);
     }
 
     isNotAtOrigin(pos)
@@ -53,6 +54,7 @@ class CardSprite extends Physics.Arcade.Sprite
     {
         if (!this.movingToOrigin)
         {
+            this.setDepth(this.oldDepth);
             this.movingToOrigin = true;
             this.hitbox.body.enable = false;
             this.scene.tweens.add({
@@ -65,19 +67,21 @@ class CardSprite extends Physics.Arcade.Sprite
         }
     }
 
-    init ()
+    init (hitboxSize, scale, depth)
     {
         this.cardOrigin = {x:this.x, y:this.y};
         this.setInteractive({ draggable: true });
-        this.setScale(0.2);
+        this.setScale(scale);
         this.on('drag', (pointer, dragX, dragY) => this.dragCard(dragX, dragY));
         this.on('dragend', (pointer, dragX, dragY) => {this.isNotDragging = true;});
         //this.scene.setInteractive();
-        this.hitbox = new CardHitbox(this);
+        this.hitbox = new CardHitbox(this, hitboxSize);
         this.scene.add.existing(this);
         this.scene.physics.add.existing(this.hitbox);
         this.hitbox.body.setAllowGravity(false);
         //this.scene.physics.add.existing(this);
+        this.setDepth(depth);
+        this.oldDepth = depth;
         return this;
     }
 

@@ -15,29 +15,58 @@ function addCardCollision(scene,hitbox1,hitbox2)
     });
 }
 
+function sortByLeftToRight(cards)
+{
+    return cards.sort((c1,c2) => c2.cardOrigin.x - c1.cardOrigin.x);
+}
+
+function bringCardToFront(cards)
+{
+    const sortedCards = sortByLeftToRight(cards);
+    for (let i = 0; i < sortedCards.length; i++)
+    {
+        const c = sortedCards[i];
+        c.depth = i;
+    }
+    return sortedCards;
+}
+
 
 class CardScene extends Scene
 {
     constructor()
     {
-        super({key: "card",active:true})
+        super({key: "card",active:true});
+        this.cards = [];
     }
     preload ()
     {
-        this.load.image("sprite","sprite.jpg");
+        this.load.image("sprite","card-dummy.png");
+    }
+
+    addCard(x,y)
+    {
+        const depth = this.cards.length;
+        const hitboxSize = 30;
+        const scale = 1;
+        const card = new CardSprite({scene:this, x:x,y:y}).init(hitboxSize, scale, depth);
+        this.cards.forEach(c => 
+        {
+            addCardCollision(this,card.hitbox, c.hitbox);
+        });
+        this.cards.push(card);
+        //this.cards = bringCardToFront(this.cards);
     }
 
     create ()
     {
+        this.addCard(400,400);
+        this.addCard(450,400);
+        this.addCard(500,400);
+    }
 
-        //this.scene.physics.add.image()
-        //this.sprite = this.physics.add.sprite(300,300, "sprite");
-        this.sprite1 = new CardSprite({scene:this, x:300,y:300}).init();
-        this.sprite2 = new CardSprite({scene:this, x:500,y:300}).init();
-        addCardCollision(this,this.sprite1.hitbox, this.sprite2.hitbox);
-        //this.sprite2 = new CardSprite({scene:this, x:100,y:300});
-        //this.sprite1.body.allowGravity(false);
-        //this.sprite2.body.setAcceleration(0,0);
+    update (dt,time)
+    {
 
     }
 }
